@@ -6,6 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
+import EBarChart from "@/components/BarChart";
+
 import AddUserDialog from "./AddUserDialog";
 import { MetaData } from "@/constant";
 
@@ -80,9 +82,9 @@ export default function Panel({
         </Button>
       </Card>
 
-      {/* <button onClick={filterPointsByRectangles} className="button">
+      <button onClick={filterPointsByRectangles} className="button">
         Filter Points
-      </button> */}
+      </button>
       <Card className="flex flex-col align-middle gap-2 p-2">
         <AddUserDialog loadUserMapData={loadUserMapData} />
         <div className="grid w-full max-w-sm items-center gap-1.5">
@@ -118,6 +120,9 @@ export default function Panel({
           <ul id="layers"></ul>
         </div>
       </Card>
+      <div className="h-[200px]">
+        <EBarChart />
+      </div>
     </div>
   );
 }

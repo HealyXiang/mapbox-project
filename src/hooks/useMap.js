@@ -310,6 +310,7 @@ export default function useMap() {
         properties: point.properties,
       })),
     };
+    console.log("filteredPoints size:", filteredPoints);
 
     addGeoJSONSource(geoJSONData, "filteredData", "filteredData-layer");
   }
