@@ -6,8 +6,8 @@ import { booleanPointInPolygon } from "@turf/turf";
 
 import { convertToGeoJSON } from "@/utils/map";
 import { useToast } from "@/components/ui/use-toast";
-
 import { MetaData } from "@/constant";
+import { useMapDataStore } from "@/store";
 
 const { user: userMeta } = MetaData;
 
@@ -20,11 +20,16 @@ export default function useMap() {
   const mapContainer = useRef(null);
   const [draw, setDraw] = useState(null);
   const [mapInstance, setMapInstance] = useState(null);
+  // eslint-disable-next-line no-unused-vars
   const [lng, setLng] = useState(110.201575627399);
+  // eslint-disable-next-line no-unused-vars
   const [lat, setLat] = useState(28.20947515918781);
+  // eslint-disable-next-line no-unused-vars
   const [zoom, setZoom] = useState(15);
   const [loadedLayers, setLoadedLayers] = useState({});
   const { toast } = useToast();
+  const setAreas = useMapDataStore((state) => state.setAreas);
+  const setUsers = useMapDataStore((state) => state.setUsers);
 
   const addLoadedLayer = useCallback(
     (layer) => {
@@ -185,9 +190,11 @@ export default function useMap() {
 
   function loadUserMapData(jsonData) {
     try {
-      const geoJSONData = convertToGeoJSON(jsonData);
+      const userGeoJSONData = convertToGeoJSON(jsonData);
       // 用户数据 addGeoJSONSource(data, sourceId, layerId, layerType = "circle")
-      addGeoJSONSource(geoJSONData, userMeta.sourceId, userMeta.layerId);
+      console.log("user geoJSONData:", userGeoJSONData);
+      setUsers(userGeoJSONData);
+      addGeoJSONSource(userGeoJSONData, userMeta.sourceId, userMeta.layerId);
       return true;
     } catch (error) {
       console.error("load user map data error:", error);
@@ -224,6 +231,7 @@ export default function useMap() {
       const reader = new FileReader();
       reader.onload = function (e) {
         const data = JSON.parse(e.target.result);
+        setAreas(data);
         draw.set({
           type: "FeatureCollection",
           features: data.features,

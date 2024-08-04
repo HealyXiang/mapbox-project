@@ -1,12 +1,10 @@
 /* eslint-disable react/prop-types */
-import { useRef, useMemo } from "react";
+import { useMemo } from "react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-
-import EBarChart from "@/components/BarChart";
 
 import AddUserDialog from "./AddUserDialog";
 import { MetaData } from "@/constant";
@@ -32,17 +30,17 @@ export default function Panel({
   addClusterLayer,
   addLineLayer,
 }) {
-  const userInputRef = useRef();
+  // const userInputRef = useRef();
   console.log(MetaData);
   const userNumber = useMemo(() => {
     const size = loadedLayers?.[MetaData.user.layerId]?.data?.features?.length;
     return size ? size : null;
   });
-  const uploadUserData = () => {
-    if (userInputRef.current) {
-      userInputRef.current.click();
-    }
-  };
+  // const uploadUserData = () => {
+  //   if (userInputRef.current) {
+  //     userInputRef.current.click();
+  //   }
+  // };
 
   const loadBatchUserMapData = (event) => {
     const file = event.target.files[0];
@@ -50,7 +48,6 @@ export default function Panel({
       const reader = new FileReader();
       reader.onload = function (e) {
         const jsonData = JSON.parse(e.target.result);
-        console.log("jsonData:", jsonData);
         loadUserMapData(jsonData);
       };
       reader.readAsText(file);
@@ -120,9 +117,7 @@ export default function Panel({
           <ul id="layers"></ul>
         </div>
       </Card>
-      <div className="h-[200px]">
-        <EBarChart />
-      </div>
+      <div className="h-[200px]">{/* <EBarChart /> */}</div>
     </div>
   );
 }
