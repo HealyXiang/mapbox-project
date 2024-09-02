@@ -4,7 +4,7 @@ import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import { useCallback } from "react";
 import { booleanPointInPolygon } from "@turf/turf";
 
-import { convertToGeoJSON } from "@/utils/map";
+import { convertToGeoJSON, convertToHeatmapGeoJSON } from "@/utils/map";
 import { useToast } from "@/components/ui/use-toast";
 import { MetaData } from "@/constant";
 import { useMapDataStore } from "@/store";
@@ -56,10 +56,18 @@ export default function useMap() {
       mapInstance.removeSource(sourceId);
       removeLoadedLayer(layerId);
     }
-
+    let sourceData = data;
+    if (sourceId === "heatmap-sampleData") {
+      sourceData = {
+        ...data,
+        features: convertToHeatmapGeoJSON(data.features),
+      };
+    }
+    console.log("sourceData sourceData:", sourceData);
+    // console.log("data data:", data);
     mapInstance.addSource(sourceId, {
       type: "geojson",
-      data,
+      data: sourceData,
     });
 
     const layer = {
@@ -81,6 +89,7 @@ export default function useMap() {
         "fill-opacity": 0.4,
       };
     } else if (layerType === "heatmap") {
+      // 热力图layer绘制
       layer.type = "heatmap";
       layer.paint = {
         "heatmap-weight": [
@@ -92,7 +101,15 @@ export default function useMap() {
           1,
           1,
         ],
-        "heatmap-intensity": ["interpolate", ["linear"], ["zoom"], 0, 1, 9, 3],
+        "heatmap-intensity": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          0,
+          1,
+          20,
+          10,
+        ],
         "heatmap-color": [
           "interpolate",
           ["linear"],
@@ -110,8 +127,8 @@ export default function useMap() {
           1,
           "rgb(178,24,43)",
         ],
-        "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 0, 2, 9, 20],
-        "heatmap-opacity": ["interpolate", ["linear"], ["zoom"], 7, 1, 9, 0],
+        "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 0, 2, 15, 10],
+        "heatmap-opacity": ["interpolate", ["linear"], ["zoom"], 1, 1, 20, 0.9],
       };
     } else if (layerType === "cluster") {
       mapInstance.addLayer({
@@ -350,7 +367,7 @@ export default function useMap() {
     }
     addGeoJSONSource(
       sampleData._data,
-      "sampleData",
+      "heatmap-sampleData",
       "heatmap-layer",
       "heatmap"
     );
@@ -426,7 +443,10 @@ export default function useMap() {
       container: "map",
       //   container: document.querySelector("#map"),
       style: "mapbox://styles/mapbox/streets-v12",
+      // style: "mapbox://styles/mapbox/dark-v11",
       center: [lng, lat],
+      // center: [-120, 50],
+      // zoom: 2,
       zoom: zoom,
     });
 

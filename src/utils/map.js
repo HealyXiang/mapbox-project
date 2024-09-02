@@ -21,6 +21,25 @@ export function convertToGeoJSON(data) {
   };
 }
 
+export function convertToHeatmapGeoJSON(data) {
+  const features = data.map((item) => ({
+    type: "Feature",
+    geometry: {
+      ...item.geometry,
+    },
+    properties: {
+      name: item.name,
+      address: item.address,
+      service: item.service,
+      category: item.category,
+      timestamp: item.timestamp,
+      mag: 1, // Assuming each point has a magnitude of 1 for heatmap purposes
+    },
+  }));
+
+  return features;
+}
+
 export function downloadRectangles(draw) {
   const data = draw?.getAll();
   if (data.features.length === 0) {

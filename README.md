@@ -30,3 +30,40 @@
    ```
 
 项目命令行内容见根目录下`package.json`文件。
+
+## MapBox 热力图
+
+1. 热力图也是通过点数据表现的，核心是通过点数据的 `properties.mag`字段实现的
+2. 绘制热力图 layer 时，核心参数如下：
+
+```
+   layer.type = "heatmap";
+   layer.paint = {
+   "heatmap-weight": ["interpolate", ["linear"], ["get", "mag"], 0, 0, 1, 1],
+   // 控制每个点的权重，影响热力图的强度。线性差值，mag为0时，权重为1；mag为1时，权重也为1
+   "heatmap-intensity": ["interpolate", ["linear"], ["zoom"], 0, 1, 20, 10],
+   // 控制热力图的强度，影响颜色和透明度。会根据当前的缩放级别来决定热力图的强度。
+   "heatmap-color": [
+      "interpolate",
+      ["linear"],
+      ["heatmap-density"],
+      0,
+      "rgba(33,102,172,0)",
+      0.2,
+      "rgb(103,169,207)",
+      0.4,
+      "rgb(209,229,240)",
+      0.6,
+      "rgb(253,219,199)",
+      0.8,
+      "rgb(239,138,98)",
+      1,
+      "rgb(178,24,43)",
+   ],
+   // 表示当前热力图的密度值。Mapbox 会根据当前的密度值来决定热力图的颜色
+   "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 0, 2, 15, 10],
+   // Mapbox 会根据当前的缩放级别来决定热力图中每个数据点的半径。
+   "heatmap-opacity": ["interpolate", ["linear"], ["zoom"], 1, 1, 20, 0.9],
+   // Mapbox 会根据当前的缩放级别来决定热力图的透明度。
+   };
+```
