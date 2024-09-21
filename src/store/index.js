@@ -3,7 +3,20 @@ import { create } from "zustand";
 
 export const useMapDataStore = create((set) => ({
   areas: [],
-  users: [],
+  users: {},
   setAreas: (areas) => set((state) => ({ areas })),
-  setUsers: (users) => set((state) => ({ users })),
+  setUsers: (usersGeoJson) => set((state) => ({ users: usersGeoJson })),
+  addUsers: (usersGeoJson) =>
+    set((state) => {
+      const oldFeatures = state.users?.features || [];
+      const newFeatures = usersGeoJson?.features || [];
+      const allFeatures = [...oldFeatures, ...newFeatures];
+
+      return { users: { ...state.users, features: allFeatures } };
+    }),
 }));
+
+// export const mapBoxStore = create((set) => ({
+//   mapInstance: null,
+//   setMapInstance: (mapInstance) => set((state) => ({ mapInstance })),
+// }));

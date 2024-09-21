@@ -3,21 +3,31 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  // DialogClose,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import AddUserForm from "./AddUserForm";
+import { useToast } from "@/components/ui/use-toast";
 
-export default function AddUserDialog({ loadUserMapData }) {
+import AddUserForm from "./AddUserForm";
+import useAddUser from "@/hooks/useAddUser";
+
+export default function AddUserDialog() {
+  const { toast } = useToast();
+
   const [open, setOpen] = useState(false);
+  const { addOneMapUser } = useAddUser();
+
   const handleSubmit = (userValue) => {
-    const loadRes = loadUserMapData(userValue);
-    if (loadRes) {
+    try {
+      const loadRes = addOneMapUser(userValue);
+      toast({ description: "增加用户数据成功" });
       setOpen(false);
+      console.log("loadRes loadRes:", loadRes);
+    } catch (error) {
+      console.log("input add user error:", error);
     }
   };
 

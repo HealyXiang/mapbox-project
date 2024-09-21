@@ -30,6 +30,7 @@ export default function useMap() {
   const { toast } = useToast();
   const setAreas = useMapDataStore((state) => state.setAreas);
   const setUsers = useMapDataStore((state) => state.setUsers);
+  const addUsers = useMapDataStore((state) => state.addUsers);
 
   const addLoadedLayer = useCallback(
     (layer) => {
@@ -207,10 +208,26 @@ export default function useMap() {
 
   function loadUserMapData(jsonData) {
     try {
+      console.log("jsonData jsonData:", jsonData);
       const userGeoJSONData = convertToGeoJSON(jsonData);
       // 用户数据 addGeoJSONSource(data, sourceId, layerId, layerType = "circle")
       console.log("user geoJSONData:", userGeoJSONData);
       setUsers(userGeoJSONData);
+      addGeoJSONSource(userGeoJSONData, userMeta.sourceId, userMeta.layerId);
+      return true;
+    } catch (error) {
+      console.error("load user map data error:", error);
+      return false;
+    }
+  }
+
+  function addUserMapData(jsonData) {
+    try {
+      console.log("jsonData jsonData:", jsonData);
+      const userGeoJSONData = convertToGeoJSON(jsonData);
+      // 用户数据 addGeoJSONSource(data, sourceId, layerId, layerType = "circle")
+      console.log("user geoJSONData:", userGeoJSONData);
+      addUsers(userGeoJSONData);
       addGeoJSONSource(userGeoJSONData, userMeta.sourceId, userMeta.layerId);
       return true;
     } catch (error) {
@@ -436,6 +453,7 @@ export default function useMap() {
   }, [mapInstance, updateLayerList, draw, loadedLayers]);
 
   useEffect(() => {
+    // 初始化 mapboxInstance
     if (mapInstance) return; // initialize map only once
     // if (!mapContainer.current) return;
     const newMap = new mapboxgl.Map({
@@ -463,8 +481,9 @@ export default function useMap() {
   }, [lng, lat, zoom, mapInstance]);
 
   useEffect(() => {
+    if (mapInstance) return;
     initLoad();
-  }, [initLoad]);
+  }, [mapInstance, initLoad]);
 
   return {
     mapInstance,
@@ -477,6 +496,7 @@ export default function useMap() {
     filterPointsByRectangles,
     loadUserMapData,
     downloadUserData,
+    addUserMapData,
     addHeatmapLayer,
     addClusterLayer,
     addLineLayer,

@@ -8,6 +8,8 @@ import { Card } from "@/components/ui/card";
 
 import AddUserDialog from "./AddUserDialog";
 import { MetaData } from "@/constant";
+import useMapBoxStore from "@/store/mapBox";
+import { useMapDataStore } from "@/store";
 
 export function InputFile() {
   return (
@@ -19,7 +21,7 @@ export function InputFile() {
 }
 
 export default function Panel({
-  loadedLayers,
+  // loadedLayers,
   downloadRectangles,
   loadRectanglesFile,
   unloadRectangles,
@@ -31,11 +33,21 @@ export default function Panel({
   addLineLayer,
 }) {
   // const userInputRef = useRef();
-  console.log(MetaData);
+  const state = useMapBoxStore((state) => state);
+  const { loadedLayers, updateLayer } = state;
+  console.log("state in Panel:", state);
+
+  console.log("loadedLayers in Panel:", loadedLayers);
+
+  const { users } = useMapDataStore((state) => state);
+
   const userNumber = useMemo(() => {
-    const size = loadedLayers?.[MetaData.user.layerId]?.data?.features?.length;
+    // console.log("MetaData::", MetaData);
+    // console.log("loadedLayers:", loadedLayers);
+    // const size = loadedLayers?.[MetaData.user.layerId]?.data?.features?.length;
+    const size = users?.features?.length;
     return size ? size : null;
-  });
+  }, [users]);
   // const uploadUserData = () => {
   //   if (userInputRef.current) {
   //     userInputRef.current.click();
@@ -83,7 +95,7 @@ export default function Panel({
         Filter Points
       </button>
       <Card className="flex flex-col align-middle gap-2 p-2">
-        <AddUserDialog loadUserMapData={loadUserMapData} />
+        <AddUserDialog />
         <div className="grid w-full max-w-sm items-center gap-1.5">
           <Label htmlFor="picture">批量上传用户数据</Label>
           <Input
@@ -95,6 +107,9 @@ export default function Panel({
         </div>
         <Button variant="secondary" onClick={downloadUserData}>
           下载用户数据
+        </Button>
+        <Button variant="secondary" onClick={updateLayer}>
+          测试 loadedLayers
         </Button>
         <div className="grid w-full max-w-sm items-center gap-1.5">
           当前用户数量： {userNumber}

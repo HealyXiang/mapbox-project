@@ -74,6 +74,13 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* 覆盖mapbox popup的关闭按钮样式 */
+button.mapboxgl-popup-close-button {
+  width: 30px; /* 设置宽度 */
+  height: 30px; /* 设置高度 */
+  font-size: 20px; /* 设置字体大小 */
+}
 /* 
 .map-container {
   display: flex;

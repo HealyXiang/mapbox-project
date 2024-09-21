@@ -42,7 +42,7 @@ const formSchema = z.object({
 //   },
 //   "timestamp": "2024-06-06T17:02:45.844611"
 // },
-const formItems = [
+const defaultFormItems = [
   {
     formItemKey: "username",
     formItemLabel: "姓名",
@@ -65,32 +65,22 @@ const formItems = [
   },
 ];
 
-export default function AddUserForm({ handleSubmit }) {
-  // ...
+export default function AddUserForm({
+  handleSubmit,
+  defaultValues,
+  formItems = defaultFormItems,
+}) {
   const onSubmit = (values) => {
-    const newUserData = [
-      {
-        name: values.username,
-        address: values.address,
-        service: "Service 1",
-        category: "ERyAkMPB",
-        location: {
-          latitude: +values.latitude || 0,
-          longitude: +values.longitude || 0,
-        },
-        timestamp: "2024-06-06T17:02:45.844611",
-      },
-    ];
-    handleSubmit && handleSubmit(newUserData);
+    handleSubmit && handleSubmit(values);
   };
 
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: "",
-      address: "",
-      latitude: "",
-      longitude: "",
+      username: defaultValues?.username || "",
+      address: defaultValues?.address || "",
+      latitude: defaultValues?.latitude || "",
+      longitude: defaultValues?.longitude || "",
     },
   });
 
@@ -98,7 +88,7 @@ export default function AddUserForm({ handleSubmit }) {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-1">
         {formItems.map(
-          ({ formItemKey, formItemLabel, formItemPlaceholder }) => (
+          ({ formItemKey, formItemLabel, formItemPlaceholder, disabled }) => (
             <FormField
               key={formItemKey}
               control={form.control}
@@ -110,6 +100,7 @@ export default function AddUserForm({ handleSubmit }) {
                     <Input
                       // type="number"
                       placeholder={formItemPlaceholder}
+                      disabled={!!disabled}
                       {...field}
                     />
                   </FormControl>
