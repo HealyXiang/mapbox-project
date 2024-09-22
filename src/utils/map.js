@@ -1,3 +1,4 @@
+import { uid } from "uid";
 export function convertToGeoJSON(data) {
   const features = data.map((item) => ({
     type: "Feature",
@@ -56,3 +57,33 @@ export function downloadRectangles(draw) {
   a.click();
   document.body.removeChild(a);
 }
+
+class SourceIdGenerator {
+  userSourcePrefix = "user";
+  heatMapPrefix = "heatmap";
+  constructor() {
+    this.sourceId = 0;
+  }
+
+  generateUserSourceId() {
+    return `${this.userSourcePrefix}_${uid()}`;
+  }
+
+  generateUserLayerId() {
+    return `${this.userSourcePrefix}_${uid()}`;
+  }
+
+  isUserSourceId(sourceId) {
+    return sourceId.startsWith(this.userSourcePrefix);
+  }
+
+  generateHeatMapSourceId() {
+    return `${this.heatMapPrefix}_${uid()}`;
+  }
+
+  generateHeatMapLayerId() {
+    return `${this.heatMapPrefix}_${uid()}`;
+  }
+}
+
+export const sourceIdGenerator = new SourceIdGenerator();

@@ -6,7 +6,11 @@ import { booleanPointInPolygon } from "@turf/turf";
 import { uid } from "uid";
 
 import { MetaData } from "@/constant";
-import { convertToGeoJSON, convertToHeatmapGeoJSON } from "@/utils/map";
+import {
+  convertToGeoJSON,
+  convertToHeatmapGeoJSON,
+  sourceIdGenerator,
+} from "@/utils/map";
 import { useMapDataStore } from "./index";
 
 const InitParams = {
@@ -44,14 +48,20 @@ const useMapBoxStore = create((set) => ({
         const userGeoJSONData = convertToGeoJSON(mapUserArr);
         // 用户数据 addGeoJSONSource(data, sourceId, layerId, layerType = "circle")
         console.log("user geoJSONData:", userGeoJSONData);
-        useMapDataStore.getState().addUsers(userGeoJSONData);
+        const userSourceId = sourceIdGenerator.generateUserSourceId();
+        const userLayerId = sourceIdGenerator.generateUserLayerId();
+        useMapDataStore
+          .getState()
+          .addUsers(userGeoJSONData, userSourceId, userLayerId);
         // setUsers(userGeoJSONData);
         state.addGeoJSONSource(
           userGeoJSONData,
           //   userMeta.sourceId,
-          uid(),
+          userSourceId,
+          //   uid(),
           //   userMeta.layerId
-          uid()
+          userLayerId
+          //   uid()
         );
         return state;
       } catch (error) {
@@ -71,12 +81,18 @@ const useMapBoxStore = create((set) => ({
   addGeoJSONSource: (data, sourceId, layerId, layerType = "circle") =>
     set((state) => {
       const { mapInstance, addLoadedLayer, updateLayerList } = state;
-      if (mapInstance.getSource(sourceId)) {
+      const oldSource = mapInstance.getSource(sourceId);
+      console.log("oldSource:", oldSource);
+      if (
+        mapInstance.getSource(sourceId) &&
+        !sourceIdGenerator.isUserSourceId(sourceId)
+      ) {
         mapInstance.removeLayer(layerId);
         mapInstance.removeSource(sourceId);
         state.removeLoadedLayer(layerId);
       }
       let sourceData = data;
+      console.log("new source:", sourceData);
       if (sourceId === "heatmap-sampleData") {
         sourceData = {
           ...data,
@@ -265,17 +281,28 @@ const useMapBoxStore = create((set) => ({
   addHeatmapLayer: () =>
     set((state) => {
       const { mapInstance, addGeoJSONSource } = state;
-      const sampleData = mapInstance.getSource("sampleData");
-      if (!sampleData) {
+      const users = useMapDataStore.getState().users;
+      const userSourceIds = Object.keys(users);
+      const userSourceData = [];
+      userSourceIds.forEach((sourceId) => {
+        userSourceData.push(mapInstance.getSource(sourceId)._data);
+      });
+      //   const sampleData = mapInstance.getSource("sampleData");
+      if (!userSourceData) {
         alert("Load sample data first.");
         return state;
       }
-      addGeoJSONSource(
-        sampleData._data,
-        "heatmap-sampleData",
-        "heatmap-layer",
-        "heatmap"
-      );
+      userSourceData.forEach((data) => {
+        addGeoJSONSource(
+          data,
+          //   "heatmap-sampleData",
+          sourceIdGenerator.generateHeatMapSourceId(),
+          //   "heatmap-layer",
+          sourceIdGenerator.generateHeatMapLayerId(),
+          "heatmap"
+        );
+      });
+
       return state;
     }),
   downloadRectangles: () =>
@@ -396,18 +423,24 @@ const useMapBoxStore = create((set) => ({
     }),
   downloadUserData: () =>
     set((state) => {
-      const { mapInstance, userMeta, toast } = state;
-      const userData = mapInstance.getSource(userMeta.sourceId);
-      console.log("userData:", userData);
-      if (!userData) {
+      const { mapInstance, toast } = state;
+      const users = useMapDataStore.getState().users;
+      const userSourceIds = Object.keys(users);
+      console.log("userSourceIds:", userSourceIds);
+      const userSources = [];
+      userSourceIds.forEach((sourceId) => {
+        userSources.push(mapInstance.getSource(sourceId)?._data);
+      });
+      console.log("userData:", userSources);
+      if (!userSources.length) {
         toast({
           description: "No user data to download.",
         });
         return;
       }
-      const res = mapInstance.querySourceFeatures(userMeta.sourceId);
-      console.log("res:", res);
-      const blob = new Blob([JSON.stringify(userData._data)], {
+      //   const res = mapInstance.querySourceFeatures(userSourceIds[0]);
+      //   console.log("res:", res);
+      const blob = new Blob([JSON.stringify(userSources)], {
         type: "application/json",
       });
       const url = URL.createObjectURL(blob);

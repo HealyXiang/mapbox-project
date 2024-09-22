@@ -35,18 +35,16 @@ export default function Panel({
   // const userInputRef = useRef();
   const state = useMapBoxStore((state) => state);
   const { loadedLayers, updateLayer } = state;
-  console.log("state in Panel:", state);
-
-  console.log("loadedLayers in Panel:", loadedLayers);
 
   const { users } = useMapDataStore((state) => state);
+  console.log("users users:", users);
 
   const userNumber = useMemo(() => {
-    // console.log("MetaData::", MetaData);
-    // console.log("loadedLayers:", loadedLayers);
     // const size = loadedLayers?.[MetaData.user.layerId]?.data?.features?.length;
-    const size = users?.features?.length;
-    return size ? size : null;
+    const numSize = Object.values(users)?.reduce((prev, cur) => {
+      return prev + cur.features?.length || 0;
+    }, 0);
+    return numSize ? numSize : null;
   }, [users]);
   // const uploadUserData = () => {
   //   if (userInputRef.current) {

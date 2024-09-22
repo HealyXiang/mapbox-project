@@ -6,13 +6,19 @@ export const useMapDataStore = create((set) => ({
   users: {},
   setAreas: (areas) => set((state) => ({ areas })),
   setUsers: (usersGeoJson) => set((state) => ({ users: usersGeoJson })),
-  addUsers: (usersGeoJson) =>
+  addUsers: (usersGeoJson, userSourceId, userLayerId) =>
     set((state) => {
       const oldFeatures = state.users?.features || [];
       const newFeatures = usersGeoJson?.features || [];
       const allFeatures = [...oldFeatures, ...newFeatures];
+      const newUsers = {
+        [userSourceId]: {
+          ...usersGeoJson,
+          userLayerId,
+        },
+      };
 
-      return { users: { ...state.users, features: allFeatures } };
+      return { users: { ...state.users, ...newUsers } };
     }),
 }));
 
