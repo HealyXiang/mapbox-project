@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
 import { create } from "zustand";
 import mapboxgl from "mapbox-gl";
-import MapboxDraw from "@mapbox/mapbox-gl-draw";
-import { booleanPointInPolygon } from "@turf/turf";
+import MapboxDraw, { modes } from "@mapbox/mapbox-gl-draw";
+import { booleanPointInPolygon, point } from "@turf/turf";
 import { uid } from "uid";
 
 import { MetaData } from "@/constant";
@@ -10,6 +10,8 @@ import {
   convertToGeoJSON,
   convertToHeatmapGeoJSON,
   sourceIdGenerator,
+  USER_SOURCE_ID,
+  USER_LAYER_ID,
 } from "@/utils/map";
 import { useMapDataStore } from "./index";
 
@@ -37,7 +39,17 @@ const useMapBoxStore = create((set) => ({
         center: [InitParams.lng, InitParams.lat],
         zoom: InitParams.zoom,
       });
-      const draw = new MapboxDraw();
+      const draw = new MapboxDraw({
+        displayControlsDefault: false,
+        controls: {
+          polygon: true,
+          trash: true,
+          point: true,
+        },
+        defaultMode: "draw_polygon",
+      });
+      console.log("modes modes:", modes);
+      // const draw = new MapboxDraw();
       mapInstance.addControl(draw);
       return { mapInstance, draw };
     }),
@@ -48,8 +60,10 @@ const useMapBoxStore = create((set) => ({
         const userGeoJSONData = convertToGeoJSON(mapUserArr);
         // 用户数据 addGeoJSONSource(data, sourceId, layerId, layerType = "circle")
         console.log("user geoJSONData:", userGeoJSONData);
-        const userSourceId = sourceIdGenerator.generateUserSourceId();
-        const userLayerId = sourceIdGenerator.generateUserLayerId();
+        // const userSourceId = sourceIdGenerator.generateUserSourceId();
+        // const userLayerId = sourceIdGenerator.generateUserLayerId();
+        const userSourceId = USER_SOURCE_ID;
+        const userLayerId = USER_LAYER_ID;
         useMapDataStore
           .getState()
           .addUsers(userGeoJSONData, userSourceId, userLayerId);
@@ -292,6 +306,7 @@ const useMapBoxStore = create((set) => ({
         alert("Load sample data first.");
         return state;
       }
+      console.log("userSourceData:", userSourceData);
       userSourceData.forEach((data) => {
         addGeoJSONSource(
           data,
@@ -305,6 +320,19 @@ const useMapBoxStore = create((set) => ({
 
       return state;
     }),
+  addCommonHeatmapLayer: (userSourceData) => {
+    set((state) => {
+      const { addGeoJSONSource } = state;
+      addGeoJSONSource(
+        userSourceData,
+        sourceIdGenerator.generateHeatMapSourceId(),
+        sourceIdGenerator.generateHeatMapLayerId(),
+        "heatmap"
+      );
+      return state;
+    });
+  },
+
   downloadRectangles: () =>
     set((state) => {
       const { draw } = state;

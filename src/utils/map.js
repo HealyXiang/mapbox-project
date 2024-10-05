@@ -87,3 +87,7 @@ class SourceIdGenerator {
 }
 
 export const sourceIdGenerator = new SourceIdGenerator();
+
+export const USER_SOURCE_ID = "map_user_source_id";
+
+export const USER_LAYER_ID = "map_user_layer_id";
